@@ -271,6 +271,8 @@ async function main() {
   const productName = document.getElementById('product-name');
   const thumbScroller = document.getElementById('thumb-scroller');
   const thumbArcInner = document.getElementById('thumb-arc-inner');
+  const logPanel = document.getElementById('log-panel');
+  const logLines = document.getElementById('log-lines');
 
   resizeCanvas(canvas);
   window.addEventListener('resize', () => resizeCanvas(canvas));
@@ -280,6 +282,25 @@ async function main() {
 
   let deepAR;
   let currentIndex = 0;
+  const log = (msg) => {
+    const line = `[${new Date().toISOString()}] ${msg}`;
+    console.log(line);
+    if (logLines) {
+      const div = document.createElement('div');
+      div.textContent = line;
+      logLines.appendChild(div);
+      logPanel.hidden = false;
+      logPanel.scrollTop = logPanel.scrollHeight;
+    }
+  };
+  window.addEventListener('error', (e) => log(`window.error: ${e.message}`));
+  window.addEventListener('unhandledrejection', (e) =>
+    log(`unhandledrejection: ${e.reason}`),
+  );
+  log(`UserAgent: ${navigator.userAgent}`);
+  log(`Protocol: ${location.protocol}`);
+  log(`Host: ${location.host}`);
+  log(`DeepAR license present: ${Boolean(LICENSE_KEY)}`);
 
   const selectProduct = async (index) => {
     if (!deepAR || index === currentIndex || index < 0 || index >= PRODUCTS.length) return;
@@ -288,9 +309,12 @@ async function main() {
     productName.textContent = p.name;
     setActiveThumb(thumbArcInner, index);
     try {
+      log(`switchEffect: ${p.effect}`);
       await deepAR.switchEffect(`effects/${p.effect}`);
+      log(`switchEffect ok: ${p.effect}`);
     } catch (e) {
       console.error('switchEffect failed', p.effect, e);
+      log(`switchEffect failed: ${p.effect} | ${e?.message || e}`);
     }
   };
 
@@ -310,6 +334,7 @@ async function main() {
 
   const startDeepAR = async () => {
     try {
+      log('Starting DeepAR initialize...');
       deepAR = await deepar.initialize({
         licenseKey: LICENSE_KEY,
         canvas,
@@ -322,6 +347,7 @@ async function main() {
 
       loader.style.display = 'none';
       startCameraBtn?.setAttribute('hidden', 'true');
+      log('DeepAR initialized successfully');
       if (thumbArcInner.__activeIndex >= 0) {
         selectProduct(thumbArcInner.__activeIndex);
       }
@@ -330,18 +356,21 @@ async function main() {
         if (leftFoot.detected || rightFoot.detected) {
           feetHint.hidden = true;
           deepAR.callbacks.onFeetTracked = undefined;
+          log('Feet tracked');
         }
       };
     } catch (e) {
       console.error(e);
       loader.style.display = 'none';
       document.body.classList.add('no-camera');
+      log(`DeepAR init failed: ${e?.message || e}`);
     }
   };
 
   loader.style.display = 'none';
   startCameraBtn?.removeAttribute('hidden');
   startCameraBtn?.addEventListener('click', () => {
+    log('Start Camera clicked');
     loader.style.display = 'flex';
     startDeepAR();
   });
