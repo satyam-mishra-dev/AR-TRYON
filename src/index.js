@@ -301,6 +301,17 @@ async function main() {
   log(`Protocol: ${location.protocol}`);
   log(`Host: ${location.host}`);
   log(`DeepAR license present: ${Boolean(LICENSE_KEY)}`);
+  log(`SecureContext: ${window.isSecureContext}`);
+  log(`MediaDevices: ${Boolean(navigator.mediaDevices)}`);
+  if (navigator.mediaDevices?.enumerateDevices) {
+    navigator.mediaDevices
+      .enumerateDevices()
+      .then((devices) => {
+        const cams = devices.filter((d) => d.kind === 'videoinput').length;
+        log(`enumerateDevices ok: ${devices.length} devices, ${cams} cameras`);
+      })
+      .catch((e) => log(`enumerateDevices failed: ${e?.message || e}`));
+  }
   const checkResource = async (path) => {
     try {
       const res = await fetch(path, { method: 'GET' });
@@ -348,6 +359,17 @@ async function main() {
       if (started) return;
       started = true;
       log('Starting DeepAR initialize...');
+      log('Requesting getUserMedia (preflight)...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+          audio: false,
+        });
+        log('getUserMedia success');
+        stream.getTracks().forEach((t) => t.stop());
+      } catch (e) {
+        log(`getUserMedia failed: ${e?.name || ''} ${e?.message || e}`);
+      }
       deepAR = await deepar.initialize({
         licenseKey: LICENSE_KEY,
         canvas,
