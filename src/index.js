@@ -5,12 +5,12 @@ const PRODUCTS = [
   {
     effect: 'Arch_Slippers_Black.deepar',
     name: 'Arch Slippers Black',
-    thumb: 'https://via.placeholder.com/300x300/111111/ffffff?text=Arch+Slippers+Black',
+    thumb: 'gray.png',
   },
   {
     effect: 'Arch_Slippers_Green.deepar',
     name: 'Arch Slippers Green',
-    thumb: 'https://via.placeholder.com/300x300/0b3d2e/ffffff?text=Arch+Slippers+Green',
+    thumb: 'medium.png',
   },
   {
     effect: 'nike-dunk.deepar',
