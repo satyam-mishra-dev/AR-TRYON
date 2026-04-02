@@ -268,6 +268,7 @@ async function main() {
   const canvas = document.getElementById('deepar-canvas');
   const loader = document.getElementById('loader-wrapper');
   const feetHint = document.getElementById('feet-hint');
+  const startCameraBtn = document.getElementById('start-camera');
   const productName = document.getElementById('product-name');
   const thumbScroller = document.getElementById('thumb-scroller');
   const thumbArcInner = document.getElementById('thumb-arc-inner');
@@ -308,33 +309,43 @@ async function main() {
   renderThumbnails(thumbScroller, thumbArcInner, selectProduct, onActiveIndex, onSettle);
   setActiveThumb(thumbArcInner, 0);
 
-  try {
-    deepAR = await deepar.initialize({
-      licenseKey: LICENSE_KEY,
-      canvas,
-      effect: `effects/${first.effect}`,
-      additionalOptions: {
-        cameraConfig: { facingMode: 'environment' },
-        hint: 'footInit',
-      },
-    });
+  const startDeepAR = async () => {
+    try {
+      deepAR = await deepar.initialize({
+        licenseKey: LICENSE_KEY,
+        canvas,
+        effect: `effects/${first.effect}`,
+        additionalOptions: {
+          cameraConfig: { facingMode: 'environment' },
+          hint: 'footInit',
+        },
+      });
 
-    loader.style.display = 'none';
-    if (thumbArcInner.__activeIndex >= 0) {
-      selectProduct(thumbArcInner.__activeIndex);
-    }
-
-    deepAR.callbacks.onFeetTracked = (leftFoot, rightFoot) => {
-      if (leftFoot.detected || rightFoot.detected) {
-        feetHint.hidden = true;
-        deepAR.callbacks.onFeetTracked = undefined;
+      loader.style.display = 'none';
+      startCameraBtn?.setAttribute('hidden', 'true');
+      if (thumbArcInner.__activeIndex >= 0) {
+        selectProduct(thumbArcInner.__activeIndex);
       }
-    };
-  } catch (e) {
-    console.error(e);
-    loader.style.display = 'none';
-    document.body.classList.add('no-camera');
-  }
+
+      deepAR.callbacks.onFeetTracked = (leftFoot, rightFoot) => {
+        if (leftFoot.detected || rightFoot.detected) {
+          feetHint.hidden = true;
+          deepAR.callbacks.onFeetTracked = undefined;
+        }
+      };
+    } catch (e) {
+      console.error(e);
+      loader.style.display = 'none';
+      document.body.classList.add('no-camera');
+    }
+  };
+
+  loader.style.display = 'none';
+  startCameraBtn?.removeAttribute('hidden');
+  startCameraBtn?.addEventListener('click', () => {
+    loader.style.display = 'flex';
+    startDeepAR();
+  });
 }
 
 main().catch((err) => {
