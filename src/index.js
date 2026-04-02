@@ -50,8 +50,7 @@ const PRODUCTS = [
   },
 ];
 
-const LICENSE_KEY =
-  'b98a37541a356069cc7150029aad9ab89a62df4bc7de8f1b82689dd30a2ea69f638a76bb72a8c257';
+const LICENSE_KEY = process.env.DEEPAR_LICENSE_KEY;
 
 const THUMB_PX = 60;
 

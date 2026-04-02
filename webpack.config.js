@@ -1,4 +1,6 @@
 const path = require('path');
+const webpack = require('webpack');
+require('dotenv').config();
 
 module.exports = {
   entry: './src/index.js',
@@ -34,4 +36,9 @@ module.exports = {
     host: '0.0.0.0',
     allowedHosts: 'all',
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.DEEPAR_LICENSE_KEY': JSON.stringify(process.env.DEEPAR_LICENSE_KEY || ''),
+    }),
+  ],
 };
