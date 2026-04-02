@@ -301,6 +301,16 @@ async function main() {
   log(`Protocol: ${location.protocol}`);
   log(`Host: ${location.host}`);
   log(`DeepAR license present: ${Boolean(LICENSE_KEY)}`);
+  const checkResource = async (path) => {
+    try {
+      const res = await fetch(path, { method: 'GET' });
+      log(`Resource ${path} -> ${res.status}`);
+    } catch (e) {
+      log(`Resource ${path} failed: ${e?.message || e}`);
+    }
+  };
+  checkResource('/deepar-resources/js/deepar.js');
+  checkResource('/deepar-resources/file_sizes.json');
 
   const selectProduct = async (index) => {
     if (!deepAR || index === currentIndex || index < 0 || index >= PRODUCTS.length) return;
@@ -332,8 +342,11 @@ async function main() {
   renderThumbnails(thumbScroller, thumbArcInner, selectProduct, onActiveIndex, onSettle);
   setActiveThumb(thumbArcInner, 0);
 
+  let started = false;
   const startDeepAR = async () => {
     try {
+      if (started) return;
+      started = true;
       log('Starting DeepAR initialize...');
       deepAR = await deepar.initialize({
         licenseKey: LICENSE_KEY,
@@ -369,11 +382,20 @@ async function main() {
 
   loader.style.display = 'none';
   startCameraBtn?.removeAttribute('hidden');
-  startCameraBtn?.addEventListener('click', () => {
-    log('Start Camera clicked');
+  log('Start Camera button shown');
+  const triggerStart = (source) => {
+    log(`Start Camera triggered by ${source}`);
     loader.style.display = 'flex';
     startDeepAR();
-  });
+  };
+  startCameraBtn?.addEventListener('click', () => triggerStart('button'));
+  const autoStartOnce = () => {
+    document.removeEventListener('touchend', autoStartOnce);
+    document.removeEventListener('mousedown', autoStartOnce);
+    triggerStart('first-gesture');
+  };
+  document.addEventListener('touchend', autoStartOnce, { passive: true });
+  document.addEventListener('mousedown', autoStartOnce);
 }
 
 main().catch((err) => {
