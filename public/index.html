@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>AR try-on</title>
+  <!-- Embed: <iframe src="https://your-host/" allow="camera" title="AR try-on"></iframe> -->
+  <link rel="stylesheet" href="embed.css">
+</head>
+<body>
+  <div id="app">
+    <div id="loader-wrapper">
+      <span class="loader" aria-hidden="true"></span>
+      <p class="loader-text">Loading try-on…</p>
+    </div>
+
+    <main class="stage">
+      <canvas id="deepar-canvas" class="deepar"></canvas>
+      <p id="feet-hint" class="feet-hint">Point the camera at your feet to try shoes on.</p>
+    </main>
+
+    <footer class="product-dock" aria-label="Products">
+      <p id="product-name" class="product-name"></p>
+      <div id="thumb-scroller" class="thumb-scroller">
+        <div id="thumb-arc-inner" class="thumb-arc-inner"></div>
+      </div>
+    </footer>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
